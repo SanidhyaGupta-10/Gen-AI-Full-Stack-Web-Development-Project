@@ -17,7 +17,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         // Verify token
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET!);
         // Attach user to request
-        (req as any).user = (decodedToken as { user: { id: string } }).user;
+        (req as any).user = decodedToken;
 
         // Call next middleware
         next();
