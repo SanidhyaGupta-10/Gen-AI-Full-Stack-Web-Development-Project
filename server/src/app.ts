@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import authRoutes from "./routes/auth.route";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import interviewRouter from "./routes/interview.routes";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/interview", interviewRouter)
 
 
 export default app;
