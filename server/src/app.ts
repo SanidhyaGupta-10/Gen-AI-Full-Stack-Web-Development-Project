@@ -1,6 +1,6 @@
 import express from "express";
 import type { Request, Response } from "express";
-import authRoutes from "./routes/auth.route";
+import authRoutes from "./routes/auth.routes";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import interviewRouter from "./routes/interview.routes";
