@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth.middleware";
-import { createInterviewReport } from "../controllers/interview.controller";
+import upload from "../middleware/file.middleware";
+import { interviewController } from "../controllers/interview.controller";
+
 
 const interviewRouter = Router();
 
@@ -9,6 +11,6 @@ const interviewRouter = Router();
  * @description generate new interview report on the basis of user self description , resume pdf and job description
  * @access private
  */
-interviewRouter.post("/", authMiddleware, createInterviewReport);
+interviewRouter.post("/", authMiddleware, upload.single('resume'), interviewController as any);
 
 export default interviewRouter;

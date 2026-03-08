@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+
 
 
 const technicalQuestionSchema = new mongoose.Schema({
@@ -86,7 +87,8 @@ const interviewReportSchema = new mongoose.Schema({
     preparationPlan: [ preparationPlanSchema ],
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "users"
+        ref: "User"
+
     },
     title: {
         type: String,
@@ -99,4 +101,4 @@ const interviewReportSchema = new mongoose.Schema({
 
 const interviewReportModel = mongoose.model("InterviewReport", interviewReportSchema);
 
-module.exports = interviewReportModel;  
+export default interviewReportModel;  

@@ -63,9 +63,7 @@ Return only valid JSON in the following format:
     throw new Error("AI returned empty response");
   }
 
-  console.log("----- RAW AI RESPONSE -----");
-  console.log(raw);
-  console.log("---------------------------");
+  console.log(raw)
 
   const parsed = JSON.parse(raw);
 
