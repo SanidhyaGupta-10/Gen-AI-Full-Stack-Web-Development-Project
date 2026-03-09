@@ -4,10 +4,12 @@ import { motion } from "framer-motion";
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { register } from "@/app/hooks/useAuth.hook";
 import LoadingSpinner from "@/app/components/Loader";
 
+import { useAuth } from "@/app/hooks/useAuth";
+
 export default function Page() {
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,9 +27,7 @@ export default function Page() {
       
       const response = await register({ name, email, password });
       
-      // The backend returns { user, token }. Use the presence of user/token as success.
       if (response && response.token) {
-        localStorage.setItem("token", response.token);
         router.push("/");
       }
     } catch (error: any) {

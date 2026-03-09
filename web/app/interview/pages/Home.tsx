@@ -106,7 +106,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 pt-5 pb-5 relative">
+    <main className="min-h-screen flex flex-col items-center justify-center px-4 mt-20 pb-5 relative">
 
       {/* ── Background Grid ── */}
       <div

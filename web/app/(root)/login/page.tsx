@@ -4,10 +4,12 @@ import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/app/hooks/useAuth.hook";
 import LoadingSpinner from "@/app/components/Loader";
 
+import { useAuth } from "@/app/hooks/useAuth";
+
 export default function LoginPage() {
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,12 +27,10 @@ export default function LoginPage() {
       const formData = new FormData(e.currentTarget);
       const email = formData.get("email") as string;
       const password = formData.get("password") as string;
-      
+
       const response = await login({ email, password });
-      
-      // The backend returns { user, token }.
+
       if (response && response.token) {
-        localStorage.setItem("token", response.token);
         router.push("/");
       }
     } catch (error: any) {
@@ -108,7 +108,7 @@ export default function LoginPage() {
                 Remember me
               </label>
 
-             
+
             </div>
 
             {/* Button */}
@@ -123,11 +123,11 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-gray-400 mt-6">
             Don’t have an account?{" "}
-            <span 
-            onClick={isNotUser
-              
-            }
-            className="text-purple-400 hover:underline cursor-pointer">
+            <span
+              onClick={isNotUser
+
+              }
+              className="text-purple-400 hover:underline cursor-pointer">
               Register
             </span>
           </p>
