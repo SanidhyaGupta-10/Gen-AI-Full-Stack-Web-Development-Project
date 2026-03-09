@@ -74,8 +74,10 @@ export default function Home() {
 
     setLoading(true);
     try {
+      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const cleanBaseUrl = baseUrl?.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
       const { data } = await axios.post(
-        "http://localhost:5000/api/interview",
+        `${cleanBaseUrl}/interview`,
         formData,
         {
           headers: {

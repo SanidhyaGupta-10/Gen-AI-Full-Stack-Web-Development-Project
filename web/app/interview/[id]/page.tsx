@@ -145,8 +145,10 @@ export default function InterviewReportPage() {
         if (!id) return;
         const fetch = async () => {
             try {
+                const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+                const cleanBaseUrl = baseUrl?.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
                 const { data } = await axios.get(
-                    `http://localhost:5000/api/interview/report/${id}`,
+                    `${cleanBaseUrl}/interview/report/${id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem("token")}`,
