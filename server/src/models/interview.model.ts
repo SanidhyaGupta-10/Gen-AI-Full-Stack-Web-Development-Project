@@ -1,7 +1,5 @@
 import mongoose from 'mongoose';
 
-
-
 const technicalQuestionSchema = new mongoose.Schema({
     question: {
         type: String,

@@ -18,7 +18,7 @@ export const interviewController = async (req: AuthenticatedRequest, res: Respon
         const data = await parser.getText();
         const resumeContent = data.text;
 
-    
+
         const { selfDescription, jobDescription, title } = req.body;
 
         if (!selfDescription || !jobDescription) {
