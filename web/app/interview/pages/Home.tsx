@@ -1,25 +1,110 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useRef, useState } from "react";
+import { motion } from "framer-motion";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
-// ─── Glass Card Component ──────────────────────────────────
-function GlassCard(
-  { children, className = "" }: { children: React.ReactNode; className?: string }
-) {
+// ─── Glass Card ──────────────────────────────────────────────
+function GlassCard({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div
-      className={`
-        rounded-2xl bg-white/5 border border-white/10 backdrop-blur-2xl
-        shadow-lg shadow-white/5 ${className}
-      `}
+      className={`rounded-2xl bg-white/5 border border-white/10 backdrop-blur-2xl shadow-lg shadow-white/5 ${className}`}
     >
       {children}
     </div>
   );
 }
 
-// ─── Main UI Component ────────────────────────────────────
+// ─── Spinner ─────────────────────────────────────────────────
+function Spinner() {
+  return (
+    <svg
+      className="animate-spin h-5 w-5 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v8z"
+      />
+    </svg>
+  );
+}
+
+// ─── Main UI ─────────────────────────────────────────────────
 export default function Home() {
+  const router = useRouter();
+
+  const [jobDescription, setJobDescription] = useState("");
+  const [selfDescription, setSelfDescription] = useState("");
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // ─── Submit ────────────────────────────────────────────────
+  const handleSubmit = async () => {
+    setError(null);
+
+    if (!jobDescription.trim()) return setError("Please paste a job description.");
+    if (!selfDescription.trim()) return setError("Please describe yourself.");
+    if (!resumeFile) return setError("Please upload your resume PDF.");
+
+    const formData = new FormData();
+    formData.append("jobDescription", jobDescription);
+    formData.append("selfDescription", selfDescription);
+    formData.append("resume", resumeFile);
+
+    setLoading(true);
+    try {
+      const { data } = await axios.post(
+        "http://localhost:5000/api/interview",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      // Navigate to the report page using the real MongoDB _id
+      const reportId =
+        data?.interviewReport?._id ?? data?.data?._id ?? data?._id;
+
+      if (!reportId) throw new Error("Server did not return a report ID.");
+
+      router.push(`/interview/${reportId}`);
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Something went wrong. Please try again.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 pt-5 pb-5 relative">
 
@@ -65,7 +150,10 @@ export default function Home() {
         <GlassCard className="h-full p-5 flex flex-col">
           <h2 className="text-white font-semibold text-sm mb-2">Job Description</h2>
           <textarea
+            id="jobDescription"
             rows={8}
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
             placeholder="Paste the full job listing..."
             className="w-full bg-transparent text-white/70 placeholder-white/30 text-sm rounded-lg p-2 resize-none outline-none border border-white/10 focus:bg-white/10 focus:border-white/20 font-mono"
           />
@@ -76,18 +164,28 @@ export default function Home() {
           {/* Resume Upload */}
           <GlassCard className="p-5">
             <h2 className="text-white font-semibold text-sm mb-2">Upload Resume</h2>
-            <button
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf"
+              onChange={(e) => setResumeFile(e.target.files?.[0] ?? null)}
               className="w-full py-4 px-3 border border-dashed border-white/10 rounded-xl bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/60 transition-all text-sm"
-            >
-              Drop PDF or click to browse
-            </button>
+            />
+            {resumeFile && (
+              <p className="mt-2 text-xs text-emerald-400/80 truncate">
+                ✅ {resumeFile.name}
+              </p>
+            )}
           </GlassCard>
 
           {/* Self Description */}
           <GlassCard className="flex-1 p-5 flex flex-col">
             <h2 className="text-white font-semibold text-sm mb-2">About You</h2>
             <textarea
+              id="selfDescription"
               rows={5}
+              value={selfDescription}
+              onChange={(e) => setSelfDescription(e.target.value)}
               placeholder="Your background & skills..."
               className="w-full bg-transparent text-white/70 placeholder-white/30 text-sm rounded-lg p-2 resize-none outline-none border border-white/10 focus:bg-white/10 focus:border-white/20 font-mono"
             />
@@ -95,12 +193,44 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* Generate Button */}
+      {/* ── Error ── */}
+      {error && (
+        <motion.p
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 text-rose-400 text-sm text-center"
+        >
+          ⚠️ {error}
+        </motion.p>
+      )}
+
+      {/* ── Generate Button ── */}
       <motion.button
-        className="mt-6 w-full max-w-sm h-12 rounded-xl text-sm font-semibold bg-linear-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500 transition-all"
+        onClick={handleSubmit}
+        disabled={loading}
+        className="mt-6 w-full max-w-sm h-12 rounded-xl text-sm font-semibold bg-linear-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500 disabled:opacity-60 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+        whileTap={{ scale: 0.97 }}
       >
-        Generate Interview Report
+        {loading ? (
+          <>
+            <Spinner />
+            Generating Report…
+          </>
+        ) : (
+          "Generate Interview Report"
+        )}
       </motion.button>
+
+      {/* ── Loading overlay hint ── */}
+      {loading && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-3 text-white/30 text-xs text-center"
+        >
+          AI is analyzing your profile — this takes ~15 seconds ⏳
+        </motion.p>
+      )}
     </main>
   );
 }
