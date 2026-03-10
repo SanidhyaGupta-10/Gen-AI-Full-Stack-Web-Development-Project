@@ -1,4 +1,4 @@
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Home from "./interview/pages/Home";
 
 function Page() {

@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import LoadingSpinner from "@/app/components/Loader";
+import LoadingSpinner from "@/components/Loader";
 
-import { useAuth } from "@/app/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const { login } = useAuth();
