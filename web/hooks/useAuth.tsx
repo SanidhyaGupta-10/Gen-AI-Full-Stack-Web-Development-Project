@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getMe, logout as apiLogout, login as apiLogin, register as apiRegister } from "@/app/hooks/useAuth.hook";
+import { getMe, logout as apiLogout, login as apiLogin, register as apiRegister } from "@/hooks/useAuth.hook";
 import { useRouter } from "next/navigation";
 
 interface User {
