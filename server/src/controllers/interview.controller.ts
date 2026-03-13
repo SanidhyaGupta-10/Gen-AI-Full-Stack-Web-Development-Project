@@ -138,6 +138,7 @@ export const generateResumePdfController = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
+  console.log(`[Controller] Generate Resume Request received for ID: ${req.params.interviewReportId}`);
   try {
     const { interviewReportId } = req.params;
 

@@ -29,19 +29,41 @@ export default function InterviewReportPage() {
         { id: "roadmap", label: "Roadmap", emoji: "🗺️" },
     ];
 
-    const handleDownloadPdf = async () => {
-        // Here you can add your API call to generate the PDF
-        // Example:
-        // const response = await axios.get(`/interview/report/${id}/pdf`, { responseType: 'blob' });
-        // const url = window.URL.createObjectURL(new Blob([response.data]));
-        // const link = document.createElement('a');
-        // link.href = url;
-        // link.setAttribute('download', `interview-${id}.pdf`);
-        // document.body.appendChild(link);
-        // link.click();
+    const [isDownloading, setIsDownloading] = useState(false);
 
-        // For simple, working code without errors right now, use browser's native print to PDF:
-        window.print();
+    const handleDownloadPdf = async () => {
+        try {
+            setIsDownloading(true);
+            const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+            const cleanBaseUrl = baseUrl?.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+            
+            const response = await fetch(`${cleanBaseUrl}/interview/resume/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem("token")}`
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate PDF');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `resume-${id}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error downloading PDF:", error);
+            alert("Failed to download PDF. Please try again.");
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     if (loading) {
@@ -160,10 +182,15 @@ export default function InterviewReportPage() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ delay: 0.8, type: "spring", stiffness: 200, damping: 20 }}
                 onClick={handleDownloadPdf}
-                className="fixed bottom-8 right-8 z-50 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-3 rounded-full shadow-lg shadow-blue-500/25 border border-white/10 backdrop-blur-md transition-all sm:bottom-10 sm:right-10 print:hidden font-medium cursor-pointer"
+                disabled={isDownloading}
+                className={`fixed bottom-8 right-8 z-50 flex items-center gap-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-3 rounded-full shadow-lg shadow-blue-500/25 border border-white/10 backdrop-blur-md transition-all sm:bottom-10 sm:right-10 print:hidden font-medium ${isDownloading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
             >
-                <Download size={20} />
-                <span>Download PDF</span>
+                {isDownloading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                    <Download size={20} />
+                )}
+                <span>{isDownloading ? "Generating..." : "Download Resume"}</span>
             </motion.button>
         </main>
     );
