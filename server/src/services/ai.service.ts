@@ -229,10 +229,12 @@ export async function generateResumePdf({
         "--no-sandbox", 
         "--disable-setuid-sandbox", 
         "--disable-dev-shm-usage",
+        "--disable-allow-vpn-loopback",
         "--disable-gpu",
-        "--single-process" // Help reduce memory usage on small instances
+        // Avoid --single-process if possible as it can be unstable on some environments
+        ...(process.platform === "win32" ? [] : ["--single-process"])
       ],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined, // Support custom chrome path on Linux
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     });
 
     try {
@@ -259,7 +261,14 @@ export async function generateResumePdf({
       console.error("[Puppeteer] Error during rendering:", renderError);
       throw new Error(`PDF rendering failed: ${renderError.message}`);
     } finally {
-      await browser.close();
+      // Ensure browser is closed, but don't let close errors override success
+      if (browser) {
+        try {
+          await browser.close();
+        } catch (closeError) {
+          console.error("[Puppeteer] Error closing browser:", closeError);
+        }
+      }
     }
   } catch (error: any) {
     console.error("[AI] Error in generateResumePdf:", error);

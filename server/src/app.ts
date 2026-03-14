@@ -8,7 +8,7 @@ import interviewRouter from "./routes/interview.routes";
 const app = express();
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || '*',
     credentials: true,
 }))
 app.use(express.json());
@@ -19,6 +19,10 @@ app.get("/", (req: Request, res: Response) => {
     res.json({
         message: "Hello World!"
     })
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
 });
 
 app.use("/api/auth", authRoutes);

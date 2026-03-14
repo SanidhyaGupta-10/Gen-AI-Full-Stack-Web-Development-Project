@@ -46,7 +46,12 @@ export default function InterviewReportPage() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to generate PDF');
+                try {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || errorData.message || 'Failed to generate PDF');
+                } catch (e) {
+                    throw new Error('Failed to generate PDF (Server Error)');
+                }
             }
 
             const blob = await response.blob();
@@ -58,9 +63,14 @@ export default function InterviewReportPage() {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error downloading PDF:", error);
-            alert("Failed to download PDF. Please try again.");
+            // Try to extract backend error message
+            let errorMessage = "Failed to download PDF. Please try again.";
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            alert(errorMessage);
         } finally {
             setIsDownloading(false);
         }
