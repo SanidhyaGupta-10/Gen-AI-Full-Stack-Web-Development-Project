@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
 import tokenBlacklist from "../models/blacklist.model";
+import { verifyToken } from "../utils/jwt";
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -15,26 +15,17 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         if (isBlacklisted) {
             return res.status(401).json({ error: "Unauthorized" });
         }
-        const secret = process.env.JWT_SECRET?.trim();
-        if (!secret) {
-            console.error("[Auth] FATAL: JWT_SECRET is not defined in environment variables");
-            return res.status(500).json({ error: "Server configuration error" });
-        }
 
         // Verify token
         let decodedToken;
         try {
-            decodedToken = jwt.verify(token, secret);
+            decodedToken = verifyToken(token);
         } catch (verifyError: any) {
             console.warn(`[Auth] Token verification failed: ${verifyError.message}`);
             return res.status(401).json({ error: "Invalid or expired token" });
         }
 
         // Attach user to request
-        if (typeof decodedToken !== "object" || !decodedToken) {
-            return res.status(401).json({ error: "Invalid token payload" });
-        }
-        
         (req as any).user = decodedToken;
 
         // Call next middleware
@@ -43,4 +34,4 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         console.error("[Auth] Unexpected error in auth middleware:", error);
         res.status(500).json({ error: "Internal server error" });
     }
-};
+};

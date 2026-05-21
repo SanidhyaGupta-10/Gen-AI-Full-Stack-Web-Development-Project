@@ -1,8 +1,14 @@
 import type { Request, Response } from "express";
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import User from "../models/user.model";
+import { hashPassword, comparePassword } from "../utils/hash";
+import { generateToken } from "../utils/jwt";
 import tokenBlacklist from "../models/blacklist.model";
+
+/**
+ * POST /api/auth/register
+ * @description Register a new user with name, email and password
+ * @access Public
+ */
 
 export const registerUser = async (req: Request, res: Response) => {
     try {
@@ -20,7 +26,7 @@ export const registerUser = async (req: Request, res: Response) => {
         }
 
         // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await hashPassword(password);
 
         // Ensure the old 'name' unique index is dropped so users can share names
         try {
@@ -33,16 +39,7 @@ export const registerUser = async (req: Request, res: Response) => {
         const user = await User.create({ name, email, password: hashedPassword });
 
         // Generate token
-        if (!process.env.JWT_SECRET) {
-            console.error("[Auth] FATAL: JWT_SECRET is not defined");
-            return res.status(500).json({ error: "Internal server configuration error" });
-        }
-
-        const token = jwt.sign(
-            { id: user._id },
-            process.env.JWT_SECRET,
-            { expiresIn: "1h" }
-        );
+        const token = generateToken(String(user._id));
 
         // Set cookie
         res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "strict", maxAge: 3600000 });
@@ -53,6 +50,12 @@ export const registerUser = async (req: Request, res: Response) => {
         res.status(500).json({ error: error?.message });
     }
 };
+
+/**
+ * POST /api/auth/login
+ * @description Authenticate user with email and password, return JWT token
+ * @access Public
+ */
 
 export const loginUser = async (req: Request, res: Response) => {
     try {
@@ -65,18 +68,13 @@ export const loginUser = async (req: Request, res: Response) => {
         }
 
         // Check password
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await comparePassword(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({ error: "Invalid password" });
         }
 
         // Generate token
-        if (!process.env.JWT_SECRET) {
-            console.error("[Auth] FATAL: JWT_SECRET is not defined");
-            return res.status(500).json({ error: "Internal server configuration error" });
-        }
-        
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        const token = generateToken(String(user._id));
 
         // Set cookie
         res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "strict", maxAge: 3600000 });
@@ -87,6 +85,12 @@ export const loginUser = async (req: Request, res: Response) => {
         res.status(500).json({ error: error?.message });
     }
 };
+
+/**
+ * POST /api/auth/logout
+ * @description Logout current user and blacklist the JWT token
+ * @access Private
+ */
 
 export const logoutUser = async (req: Request, res: Response) => {
     try {
@@ -101,6 +105,12 @@ export const logoutUser = async (req: Request, res: Response) => {
         res.status(500).json({ error: error?.message });
     }
 };
+
+/**
+ * GET /api/auth/get-me
+ * @description Get current authenticated user's profile details
+ * @access Private
+ */
 
 export const getMe = async (req: Request, res: Response) => {
     try {

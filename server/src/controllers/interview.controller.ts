@@ -12,6 +12,7 @@ import interviewReportModel from "../models/interview.model";
  * @route   POST /api/interview
  * @access  Private
  */
+
 export const generateInterViewReportController = async (
   req: AuthenticatedRequest,
   res: Response
@@ -67,6 +68,8 @@ export const generateInterViewReportController = async (
  * @route   GET /api/interview/report/:interviewId
  * @access  Private
  */
+
+
 export const getInterviewReportByIdController = async (
   req: AuthenticatedRequest,
   res: Response
@@ -106,7 +109,9 @@ export const getInterviewReportByIdController = async (
  * @route   GET /api/interview
  * @access  Private
  */
-export const getAllInterviewReportsController = async (
+export 
+
+const getAllInterviewReportsController = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
@@ -134,6 +139,8 @@ export const getAllInterviewReportsController = async (
  * @route   GET /api/interview/resume/:interviewReportId
  * @access  Private
  */
+
+
 export const generateResumePdfController = async (
   req: AuthenticatedRequest,
   res: Response

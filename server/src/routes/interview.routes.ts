@@ -16,6 +16,7 @@ const interviewRouter = Router();
  * @desc    Generate a new interview report from resume PDF, self description & job description
  * @access  Private
  */
+
 interviewRouter.post(
     "/",
     authMiddleware,
@@ -28,6 +29,7 @@ interviewRouter.post(
  * @desc    Get all interview reports of the logged-in user (list view, no heavy fields)
  * @access  Private
  */
+
 interviewRouter.get("/", authMiddleware, getAllInterviewReportsController as any);
 
 /**
@@ -35,6 +37,7 @@ interviewRouter.get("/", authMiddleware, getAllInterviewReportsController as any
  * @desc    Get a single interview report by ID (must belong to logged-in user)
  * @access  Private
  */
+
 interviewRouter.get(
     "/report/:interviewId",
     authMiddleware,
@@ -46,6 +49,7 @@ interviewRouter.get(
  * @desc    Generate and download a resume PDF for a given interview report
  * @access  Private
  */
+
 interviewRouter.get(
     "/resume/:interviewReportId",
     authMiddleware,
