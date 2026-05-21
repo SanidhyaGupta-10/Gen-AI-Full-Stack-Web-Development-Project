@@ -15,7 +15,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         if (isBlacklisted) {
             return res.status(401).json({ error: "Unauthorized" });
         }
-        if (!process.env.JWT_SECRET) {
+        const secret = process.env.JWT_SECRET?.trim();
+        if (!secret) {
             console.error("[Auth] FATAL: JWT_SECRET is not defined in environment variables");
             return res.status(500).json({ error: "Server configuration error" });
         }
@@ -23,7 +24,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         // Verify token
         let decodedToken;
         try {
-            decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+            decodedToken = jwt.verify(token, secret);
         } catch (verifyError: any) {
             console.warn(`[Auth] Token verification failed: ${verifyError.message}`);
             return res.status(401).json({ error: "Invalid or expired token" });
