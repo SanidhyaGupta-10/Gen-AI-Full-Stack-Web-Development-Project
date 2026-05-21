@@ -21,6 +21,10 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         try {
             decodedToken = verifyToken(token);
         } catch (verifyError: any) {
+            if (verifyError?.message === "JWT_SECRET is not defined") {
+                console.error("[Auth] JWT configuration error:", verifyError);
+                return res.status(500).json({ error: "Internal server error" });
+            }
             console.warn(`[Auth] Token verification failed: ${verifyError.message}`);
             return res.status(401).json({ error: "Invalid or expired token" });
         }
@@ -34,4 +38,4 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         console.error("[Auth] Unexpected error in auth middleware:", error);
         res.status(500).json({ error: "Internal server error" });
     }
-};
+};
