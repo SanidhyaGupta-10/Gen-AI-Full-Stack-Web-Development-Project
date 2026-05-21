@@ -9,6 +9,7 @@ const router = express.Router();
  * @description Register a new user
  * @access public
  */
+
 router.post("/register", registerUser);
 
 /**
@@ -16,6 +17,7 @@ router.post("/register", registerUser);
  * @description Login a user
  * @access public
  */
+
 router.post("/login", loginUser);
 
 /**
@@ -31,6 +33,7 @@ router.post("/logout", authMiddleware, logoutUser);
  * @description Get current user details
  * @access private
  */
+
 router.get("/get-me", authMiddleware, getMe);
 
 export default router;

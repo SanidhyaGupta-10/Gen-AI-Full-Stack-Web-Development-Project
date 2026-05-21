@@ -1,35 +1,20 @@
-import axios from "axios";
+import { api } from "@/lib/axios";
+import type { RegisterParams, LoginParams, AuthResponse } from "@/types/auth";
 
-export const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
-    withCredentials: true,
-})
-
-interface RegisterParams {
-    name: string;
-    email: string;
-    password: string;
-}
-
-interface LoginParams {
-    email: string;
-    password: string;
-}
-
-export const register = async (params: RegisterParams) => {
+export const register = async (params: RegisterParams): Promise<AuthResponse> => {
     try {
         const response = await api.post("auth/register", params);
         return response.data;
-    } catch (error) {
+    } catch (error: any) {
         throw error;
     }
 };
 
-export const login = async (params: LoginParams) => {
+export const login = async (params: LoginParams): Promise<AuthResponse> => {
     try {
         const response = await api.post("auth/login", params);
         return response.data;
-    } catch (error) {
+    } catch (error: any) {
         throw error;
     }
 };
@@ -43,7 +28,7 @@ export const logout = async () => {
         });
         localStorage.removeItem("token");
         return response.data;
-    } catch (error) {
+    } catch (error: any) {
         throw error;
     }
 };
@@ -56,7 +41,7 @@ export const getMe = async () => {
             },
         });
         return response.data;
-    } catch (error) {
+    } catch (error: any) {
         throw error;
     }
 }

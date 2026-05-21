@@ -1,23 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getMe, logout as apiLogout, login as apiLogin, register as apiRegister } from "./useAuth.hook";
+import { getMe, logout as apiLogout, login as apiLogin, register as apiRegister } from "./auth.service";
 import { useRouter } from "next/navigation";
-
-interface User {
-    _id: string;
-    name: string;
-    email: string;
-}
-
-interface AuthContextType {
-    user: User | null;
-    loading: boolean;
-    logout: () => Promise<void>;
-    refreshUser: () => Promise<void>;
-    login: typeof apiLogin;
-    register: typeof apiRegister;
-}
+import type { User, AuthContextType } from "@/types/auth";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
